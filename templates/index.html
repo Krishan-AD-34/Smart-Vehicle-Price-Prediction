@@ -1,6 +1,3 @@
-# templates/index.html
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,33 +9,45 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
     <div class="overlay"></div>
 
     <div class="container">
 
+        <!-- LEFT SECTION -->
         <div class="left-section">
+
             <h1>🚘 Smart Vehicle Price Predictor</h1>
+
             <p>
                 Predict the resale price of your vehicle using Machine Learning.
                 Enter vehicle details and get an estimated market value instantly.
             </p>
 
-            <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1200&auto=format&fit=crop"
-                 alt="Car Image">
+            <img
+                src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1200&auto=format&fit=crop"
+                alt="Car Image"
+            >
+
         </div>
 
+        <!-- RIGHT SECTION -->
         <div class="right-section">
 
             <h2>Vehicle Details</h2>
 
             <form id="predictForm">
 
+                <!-- BRAND -->
                 <label>Brand</label>
+
                 <select id="brand">
+
                     <option value="Maruti">Maruti</option>
                     <option value="Skoda">Skoda</option>
                     <option value="Honda">Honda</option>
@@ -70,55 +79,119 @@
                     <option value="Ashok">Ashok</option>
                     <option value="Isuzu">Isuzu</option>
                     <option value="Opel">Opel</option>
+
                 </select>
 
+                <!-- CAR AGE -->
                 <label>Car Age</label>
-                <input type="number" id="car_age" placeholder="Enter Car Age" required>
 
+                <input
+                    type="number"
+                    id="car_age"
+                    placeholder="Enter Car Age"
+                    min="0"
+                    max="30"
+                    required
+                >
+
+                <!-- FUEL -->
                 <label>Fuel Type</label>
+
                 <select id="fuel">
+
                     <option value="Petrol">Petrol</option>
                     <option value="Diesel">Diesel</option>
                     <option value="CNG">CNG</option>
                     <option value="LPG">LPG</option>
+
                 </select>
 
+                <!-- TRANSMISSION -->
                 <label>Transmission</label>
+
                 <select id="transmission">
+
                     <option value="Manual">Manual</option>
                     <option value="Automatic">Automatic</option>
+
                 </select>
+
+                <!-- SELLER -->
                 <label>Seller Type</label>
-        <select id="seller_type">
-            <option value="Dealer">Dealer</option>
-            <option value="Individual">Individual</option>
-            <option value="Trustmark Dealer">Trustmark Dealer</option>
-        </select>
 
-<label>Owner Type</label>
-<select id="owner">
-    <option value="First Owner">First Owner</option>
-    <option value="Second Owner">Second Owner</option>
-    <option value="Third Owner">Third Owner</option>
-    <option value="Fourth & Above Owner">Fourth & Above Owner</option>
-    <option value="Test Drive Car">Test Drive Car</option>
-</select>
+                <select id="seller_type">
 
+                    <option value="Dealer">Dealer</option>
+                    <option value="Individual">Individual</option>
+                    <option value="Trustmark Dealer">
+                        Trustmark Dealer
+                    </option>
+
+                </select>
+
+                <!-- OWNER -->
+                <label>Owner Type</label>
+
+                <select id="owner">
+
+                    <option value="First Owner">First Owner</option>
+
+                    <option value="Second Owner">
+                        Second Owner
+                    </option>
+
+                    <option value="Third Owner">
+                        Third Owner
+                    </option>
+
+                    <option value="Fourth & Above Owner">
+                        Fourth & Above Owner
+                    </option>
+
+                    <option value="Test Drive Car">
+                        Test Drive Car
+                    </option>
+
+                </select>
+
+                <!-- KM DRIVEN -->
                 <label>KM Driven</label>
-                <input type="number" id="km_driven" placeholder="Enter KM Driven" required>
-                <button type="submit">Predict Price</button>
+
+                <input
+                    type="number"
+                    id="km_driven"
+                    placeholder="Enter KM Driven"
+                    min="100"
+                    required
+                >
+
+                <!-- BUTTON -->
+                <button type="submit">
+
+                    Predict Price
+
+                </button>
 
             </form>
 
+            <!-- RESULT BOX -->
             <div class="result-box">
-                <h3 id="output">Estimated Price Will Appear Here</h3>
+
+                <div id="output">
+
+                    <h3>
+                        Estimated Price Will Appear Here
+                    </h3>
+
+                </div>
+
             </div>
 
         </div>
 
     </div>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 </html>

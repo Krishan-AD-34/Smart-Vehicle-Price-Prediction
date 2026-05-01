@@ -1,72 +1,49 @@
 import pandas as pd
+import pickle
+
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import r2_score
 from xgboost import XGBRegressor
-import joblib
+from sklearn.preprocessing import LabelEncoder
 
 # Load dataset
 df = pd.read_csv("CAR DETAILS FROM CAR DEKHO.csv")
 
-# Remove missing values
-df = df.dropna()
+# Create car age
+current_year = 2025
+df["car_age"] = current_year - df["year"]
 
-# Rename columns
-df = df.rename(columns={
-    "name": "brand",
-    "year": "year",
-    "selling_price": "price",
-    "km_driven": "km_driven",
-    "fuel": "fuel",
-    "seller_type": "seller_type",
-    "transmission": "transmission",
-    "owner": "owner"
-})
+# Extract brand
+df["brand"] = df["name"].apply(lambda x: x.split()[0])
 
-# Keep only first word of car name
-df["brand"] = df["brand"].apply(lambda x: x.split()[0])
+# Remove outliers
+df = df[
+    (df["selling_price"] > 50000) &
+    (df["selling_price"] < 3000000)
+]
 
-# Select useful columns
-df = df[[
+# Drop unnecessary columns
+df.drop(["name", "year"], axis=1, inplace=True)
+
+# Encode categorical columns
+label_encoders = {}
+
+categorical_cols = [
     "brand",
-    "year",
     "fuel",
     "seller_type",
     "transmission",
-    "owner",
-    "km_driven",
-    "price"
-]]
+    "owner"
+]
 
-# Extra features
-df["car_age"] = 2026 - df["year"]
-
-# Label encoders
-le_brand = LabelEncoder()
-le_fuel = LabelEncoder()
-le_seller = LabelEncoder()
-le_trans = LabelEncoder()
-le_owner = LabelEncoder()
-
-# Encode categorical data
-df["brand"] = le_brand.fit_transform(df["brand"])
-df["fuel"] = le_fuel.fit_transform(df["fuel"])
-df["seller_type"] = le_seller.fit_transform(df["seller_type"])
-df["transmission"] = le_trans.fit_transform(df["transmission"])
-df["owner"] = le_owner.fit_transform(df["owner"])
+for col in categorical_cols:
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+    label_encoders[col] = le
 
 # Features and target
-X = df[[
-    "brand",
-    "year",
-    "fuel",
-    "seller_type",
-    "transmission",
-    "owner",
-    "km_driven",
-    "car_age"
-]]
-
-y = df["price"]
+X = df.drop("selling_price", axis=1)
+y = df["selling_price"]
 
 # Train test split
 X_train, X_test, y_train, y_test = train_test_split(
@@ -76,23 +53,31 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
-# Model
+# XGBoost Model
 model = XGBRegressor(
-    n_estimators=100,
-    max_depth=5,
-    learning_rate=0.1
+    n_estimators=500,
+    learning_rate=0.05,
+    max_depth=8,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    random_state=42
 )
 
 # Train model
 model.fit(X_train, y_train)
 
-# Save model and encoders
-joblib.dump(model, "model.pkl")
+# Prediction
+pred = model.predict(X_test)
 
-joblib.dump(le_brand, "brand_encoder.pkl")
-joblib.dump(le_fuel, "fuel_encoder.pkl")
-joblib.dump(le_seller, "seller_encoder.pkl")
-joblib.dump(le_trans, "trans_encoder.pkl")
-joblib.dump(le_owner, "owner_encoder.pkl")
+# Accuracy
+score = r2_score(y_test, pred)
 
-print("Advanced model trained successfully ✅")
+print(f"Accuracy Score: {score}")
+
+# Save model
+pickle.dump(model, open("model.pkl", "wb"))
+
+# Save encoders
+pickle.dump(label_encoders, open("encoders.pkl", "wb"))
+
+print("Model trained successfully!")
