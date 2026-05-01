@@ -45,14 +45,15 @@ def predict():
 
         # Create feature array
         features = np.array([[
-            brand,
-            fuel,
-            seller,
-            trans,
-            owner,
-            km_driven,
-            car_age
-        ]])
+        km_driven,
+        fuel,
+        seller,
+        trans,
+        owner,
+        car_age,
+        brand
+
+]])
 
         # Prediction
         prediction = float(model.predict(features)[0])
