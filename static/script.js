@@ -13,8 +13,6 @@ document.getElementById("predictForm").addEventListener("submit", async function
 
     transmission: document.getElementById("transmission").value,
     km_driven: parseInt(document.getElementById("km_driven").value),
-    mileage: parseFloat(document.getElementById("mileage").value),
-    engine: parseInt(document.getElementById("engine").value)
 
 };
     const response = await fetch('/predict', {

@@ -38,8 +38,6 @@ df = df[[
 ]]
 
 # Extra features
-df["mileage"] = 20
-df["engine"] = 1200
 df["car_age"] = 2026 - df["year"]
 
 # Label encoders
@@ -65,8 +63,6 @@ X = df[[
     "transmission",
     "owner",
     "km_driven",
-    "mileage",
-    "engine",
     "car_age"
 ]]
 
@@ -82,9 +78,9 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 # Model
 model = XGBRegressor(
-    n_estimators=300,
-    max_depth=7,
-    learning_rate=0.08
+    n_estimators=100,
+    max_depth=5,
+    learning_rate=0.1
 )
 
 # Train model

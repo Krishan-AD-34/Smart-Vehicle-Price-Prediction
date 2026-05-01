@@ -51,8 +51,6 @@ def predict():
         trans,
         owner,
         data['km_driven'],
-        data['mileage'],
-        data['engine'],
         car_age
 
     ]])
