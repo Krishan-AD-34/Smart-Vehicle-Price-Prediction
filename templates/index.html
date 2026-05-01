@@ -1,0 +1,131 @@
+# templates/index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Vehicle Price Predictor</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <div class="container">
+
+        <div class="left-section">
+            <h1>🚘 Smart Vehicle Price Predictor</h1>
+            <p>
+                Predict the resale price of your vehicle using Machine Learning.
+                Enter vehicle details and get an estimated market value instantly.
+            </p>
+
+            <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1200&auto=format&fit=crop"
+                 alt="Car Image">
+        </div>
+
+        <div class="right-section">
+
+            <h2>Vehicle Details</h2>
+
+            <form id="predictForm">
+
+                <label>Brand</label>
+                <select id="brand">
+                    <option value="Maruti">Maruti</option>
+                    <option value="Skoda">Skoda</option>
+                    <option value="Honda">Honda</option>
+                    <option value="Hyundai">Hyundai</option>
+                    <option value="Toyota">Toyota</option>
+                    <option value="Ford">Ford</option>
+                    <option value="Renault">Renault</option>
+                    <option value="Mahindra">Mahindra</option>
+                    <option value="Tata">Tata</option>
+                    <option value="Chevrolet">Chevrolet</option>
+                    <option value="Datsun">Datsun</option>
+                    <option value="Jeep">Jeep</option>
+                    <option value="Mercedes-Benz">Mercedes-Benz</option>
+                    <option value="Mitsubishi">Mitsubishi</option>
+                    <option value="Audi">Audi</option>
+                    <option value="Volkswagen">Volkswagen</option>
+                    <option value="BMW">BMW</option>
+                    <option value="Nissan">Nissan</option>
+                    <option value="Lexus">Lexus</option>
+                    <option value="Jaguar">Jaguar</option>
+                    <option value="Land">Land</option>
+                    <option value="MG">MG</option>
+                    <option value="Volvo">Volvo</option>
+                    <option value="Daewoo">Daewoo</option>
+                    <option value="Kia">Kia</option>
+                    <option value="Fiat">Fiat</option>
+                    <option value="Force">Force</option>
+                    <option value="Ambassador">Ambassador</option>
+                    <option value="Ashok">Ashok</option>
+                    <option value="Isuzu">Isuzu</option>
+                    <option value="Opel">Opel</option>
+                </select>
+
+                <label>Car Age</label>
+                <input type="number" id="car_age" placeholder="Enter Car Age" required>
+
+                <label>Fuel Type</label>
+                <select id="fuel">
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="CNG">CNG</option>
+                    <option value="LPG">LPG</option>
+                </select>
+
+                <label>Transmission</label>
+                <select id="transmission">
+                    <option value="Manual">Manual</option>
+                    <option value="Automatic">Automatic</option>
+                </select>
+                <label>Seller Type</label>
+        <select id="seller_type">
+            <option value="Dealer">Dealer</option>
+            <option value="Individual">Individual</option>
+            <option value="Trustmark Dealer">Trustmark Dealer</option>
+        </select>
+
+<label>Owner Type</label>
+<select id="owner">
+    <option value="First Owner">First Owner</option>
+    <option value="Second Owner">Second Owner</option>
+    <option value="Third Owner">Third Owner</option>
+    <option value="Fourth & Above Owner">Fourth & Above Owner</option>
+    <option value="Test Drive Car">Test Drive Car</option>
+</select>
+
+                <label>KM Driven</label>
+                <input type="number" id="km_driven" placeholder="Enter KM Driven" required>
+
+                <label>Mileage</label>
+                <input type="number" id="mileage" value="20">
+
+                <label>Engine CC</label>
+                <input type="number" id="engine" value="1200">
+
+                <button type="submit">Predict Price</button>
+
+            </form>
+
+            <div class="result-box">
+                <h3 id="output">Estimated Price Will Appear Here</h3>
+            </div>
+
+        </div>
+
+    </div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
