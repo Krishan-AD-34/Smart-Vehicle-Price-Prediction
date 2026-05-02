@@ -26,6 +26,10 @@ brands = joblib.load("brands.pkl")
 
 features = joblib.load("features.pkl")
 
+print("\n========== MODEL LOADED ==========")
+print(type(model))
+print("==================================\n")
+
 # =====================================
 # HOME
 # =====================================
@@ -70,11 +74,8 @@ def get_specs(model_name):
     return jsonify({
 
         "mileage": "",
-
         "engine": "",
-
         "max_power": "",
-
         "seats": ""
     })
 
@@ -89,17 +90,19 @@ def predict():
 
         data = request.get_json()
 
+        print("\n========== RECEIVED JSON ==========")
+        print(data)
+        print("===================================\n")
+
         # =====================================
         # INPUT DATA
         # =====================================
 
         input_data = {
 
-            "brand":
-                data["brand"],
+            "brand": data["brand"],
 
-            "car_name":
-                data["car_name"],
+            "car_name": data["car_name"],
 
             "vehicle_age":
                 float(data["vehicle_age"]),
@@ -135,35 +138,66 @@ def predict():
 
         df = pd.DataFrame([input_data])
 
+        # EXACT FEATURE ORDER
         df = df[features]
 
+        print("\n========== DATAFRAME ==========")
+        print(df)
+
+        print("\n========== DTYPES ==========")
+        print(df.dtypes)
+
+        print("================================\n")
+
         # =====================================
-        # DEBUG INPUT
+        # NULL CHECK
         # =====================================
 
-        print("\n======================")
-        print("INPUT DATAFRAME:")
-        print(df)
-        print("======================")
+        if df.isnull().sum().sum() > 0:
+
+            return jsonify({
+
+                "success": False,
+
+                "error":
+                    "NaN values detected"
+            })
 
         # =====================================
         # PREDICTION
         # =====================================
 
-        prediction_raw = model.predict(df)[0]
+        prediction_log = model.predict(df)[0]
 
-        print("\n======================")
-        print("RAW MODEL OUTPUT:")
-        print(prediction_raw)
-        print("======================")
+        print("\n========== LOG PREDICTION ==========")
+        print(prediction_log)
+        print("====================================\n")
 
-        # TEMP DEBUG
-        prediction = prediction_raw
+        # =====================================
+        # LOG -> ACTUAL PRICE
+        # =====================================
 
-        print("\n======================")
-        print("FINAL PREDICTION:")
+        prediction = np.expm1(
+            prediction_log
+        )
+
+        print("\n========== FINAL PRICE ==========")
         print(prediction)
-        print("======================")
+        print("=================================\n")
+
+        # =====================================
+        # INVALID CHECK
+        # =====================================
+
+        if prediction <= 0 or np.isnan(prediction):
+
+            return jsonify({
+
+                "success": False,
+
+                "error":
+                    "Invalid prediction generated"
+            })
 
         # =====================================
         # ROUND
@@ -205,10 +239,13 @@ def predict():
 
     except Exception as e:
 
+        print("\n========== ERROR ==========")
+        print(str(e))
+        print("================================\n")
+
         return jsonify({
 
             "success": False,
-
             "error": str(e)
         })
 
@@ -230,3 +267,4 @@ if __name__ == "__main__":
 
         debug=True
     )
+
