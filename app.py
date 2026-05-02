@@ -135,36 +135,39 @@ def predict():
 
         df = pd.DataFrame([input_data])
 
-        # EXACT TRAINING ORDER
         df = df[features]
 
+        # =====================================
+        # DEBUG INPUT
+        # =====================================
+
         print("\n======================")
+        print("INPUT DATAFRAME:")
         print(df)
-        print("======================\n")
+        print("======================")
 
         # =====================================
         # PREDICTION
         # =====================================
 
-        prediction_log = model.predict(df)[0]
+        prediction_raw = model.predict(df)[0]
 
-        prediction = np.expm1(
-            prediction_log
-        )
+        print("\n======================")
+        print("RAW MODEL OUTPUT:")
+        print(prediction_raw)
+        print("======================")
+
+        # TEMP DEBUG
+        prediction = prediction_raw
+
+        print("\n======================")
+        print("FINAL PREDICTION:")
+        print(prediction)
+        print("======================")
 
         # =====================================
-        # SAFETY LIMITS
+        # ROUND
         # =====================================
-
-        prediction = max(
-            prediction,
-            100000
-        )
-
-        prediction = min(
-            prediction,
-            50000000
-        )
 
         prediction = round(prediction)
 
