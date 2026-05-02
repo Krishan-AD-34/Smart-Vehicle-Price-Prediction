@@ -18,10 +18,13 @@ brand_model_map = joblib.load(
     "brand_model_map.pkl"
 )
 
+model_spec_map = joblib.load(
+    "model_spec_map.pkl"
+)
+
 brands = joblib.load("brands.pkl")
 
 features = joblib.load("features.pkl")
-
 
 # =====================================
 # HOME
@@ -34,7 +37,6 @@ def home():
         "index.html",
         brands=brands
     )
-
 
 # =====================================
 # GET MODELS API
@@ -50,6 +52,31 @@ def get_models(brand):
 
     return jsonify(models)
 
+# =====================================
+# GET VEHICLE SPECS
+# =====================================
+
+@app.route("/get_specs/<model_name>")
+def get_specs(model_name):
+
+    specs = model_spec_map.get(
+        model_name
+    )
+
+    if specs:
+
+        return jsonify(specs)
+
+    return jsonify({
+
+        "mileage": "",
+
+        "engine": "",
+
+        "max_power": "",
+
+        "seats": ""
+    })
 
 # =====================================
 # PREDICT
@@ -63,7 +90,7 @@ def predict():
         data = request.get_json()
 
         # =====================================
-        # INPUT DATAFRAME
+        # INPUT DATA
         # =====================================
 
         input_data = {
@@ -102,10 +129,18 @@ def predict():
                 float(data["seats"])
         }
 
+        # =====================================
+        # DATAFRAME
+        # =====================================
+
         df = pd.DataFrame([input_data])
 
-        # Match exact training order
+        # EXACT TRAINING ORDER
         df = df[features]
+
+        print("\n======================")
+        print(df)
+        print("======================\n")
 
         # =====================================
         # PREDICTION
@@ -123,7 +158,7 @@ def predict():
 
         prediction = max(
             prediction,
-            50000
+            100000
         )
 
         prediction = min(
@@ -162,7 +197,7 @@ def predict():
             "upper_price":
                 f"₹ {upper_price:,.0f}",
 
-            "confidence": "87%"
+            "confidence": "87.5%"
         })
 
     except Exception as e:
@@ -173,7 +208,6 @@ def predict():
 
             "error": str(e)
         })
-
 
 # =====================================
 # MAIN

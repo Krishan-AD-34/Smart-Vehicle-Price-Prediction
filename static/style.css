@@ -263,6 +263,21 @@ select:focus{
 }
 
 /* =========================
+   READONLY INPUTS
+========================= */
+
+input[readonly]{
+
+    background:#eef2ff;
+
+    cursor:not-allowed;
+
+    color:#374151;
+
+    font-weight:600;
+}
+
+/* =========================
    BUTTON
 ========================= */
 
@@ -351,6 +366,44 @@ button:hover{
     line-height:1.4;
 }
 
+.price{
+
+    font-size:42px;
+
+    font-weight:700;
+
+    color:#111827;
+}
+
+.details{
+
+    margin-top:18px;
+
+    color:#4b5563;
+
+    font-size:15px;
+
+    line-height:1.8;
+}
+
+.loading{
+
+    color:#4f46e5;
+
+    font-size:18px;
+
+    font-weight:600;
+}
+
+.error{
+
+    color:#dc2626;
+
+    font-size:18px;
+
+    font-weight:600;
+}
+
 /* =========================
    SCROLLBAR
 ========================= */
@@ -424,5 +477,10 @@ button:hover{
     #result{
 
         font-size:30px;
+    }
+
+    .price{
+
+        font-size:32px;
     }
 }

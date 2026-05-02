@@ -17,7 +17,6 @@ from xgboost import XGBRegressor
 df = pd.read_csv("cardekho_dataset.csv")
 
 print("\nDataset Loaded Successfully!\n")
-print(df.head())
 
 # ==========================================
 # BASIC CLEANING
@@ -25,23 +24,18 @@ print(df.head())
 
 df.dropna(inplace=True)
 
-# Remove duplicates
 df.drop_duplicates(inplace=True)
 
 # ==========================================
 # REMOVE OUTLIERS
 # ==========================================
 
-# Remove extremely cheap cars
 df = df[df["selling_price"] > 100000]
 
-# Remove extremely expensive cars
 df = df[df["selling_price"] < 50000000]
 
-# Remove unrealistic kms
 df = df[df["km_driven"] < 300000]
 
-# Remove very old cars
 df = df[df["vehicle_age"] < 18]
 
 # ==========================================
@@ -65,7 +59,6 @@ for col in numeric_columns:
         errors="coerce"
     )
 
-# Fill missing numeric values
 for col in numeric_columns:
 
     df[col].fillna(
@@ -93,8 +86,6 @@ for col in string_columns:
         .str.strip()
     )
 
-
-
 # ==========================================
 # FINAL FEATURES
 # ==========================================
@@ -116,7 +107,7 @@ final_features = [
 X = df[final_features]
 
 # ==========================================
-# LOG TRANSFORM TARGET
+# TARGET
 # ==========================================
 
 y = np.log1p(df["selling_price"])
@@ -187,7 +178,7 @@ model = Pipeline(
 )
 
 # ==========================================
-# TRAIN TEST SPLIT
+# SPLIT
 # ==========================================
 
 X_train, X_test, y_train, y_test = train_test_split(
@@ -198,7 +189,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # ==========================================
-# TRAIN MODEL
+# TRAIN
 # ==========================================
 
 print("\nTraining Started...\n")
@@ -213,7 +204,6 @@ print("\nTraining Completed!\n")
 
 pred_log = model.predict(X_test)
 
-# Reverse log transform
 pred = np.expm1(pred_log)
 
 actual = np.expm1(y_test)
@@ -237,7 +227,7 @@ print(f"MAE      : ₹ {mae:,.0f}")
 joblib.dump(model, "model.pkl")
 
 # ==========================================
-# BRAND -> MODELS MAPPING
+# BRAND -> MODELS MAP
 # ==========================================
 
 brand_model_map = {}
@@ -256,6 +246,36 @@ for brand in sorted(df["brand"].unique()):
 joblib.dump(
     brand_model_map,
     "brand_model_map.pkl"
+)
+
+# ==========================================
+# MODEL SPEC MAP
+# ==========================================
+
+model_spec_map = {}
+
+grouped = df.groupby("car_name")
+
+for model_name, group in grouped:
+
+    model_spec_map[model_name] = {
+
+        "mileage":
+            float(group["mileage"].median()),
+
+        "engine":
+            float(group["engine"].median()),
+
+        "max_power":
+            float(group["max_power"].median()),
+
+        "seats":
+            int(group["seats"].mode()[0])
+    }
+
+joblib.dump(
+    model_spec_map,
+    "model_spec_map.pkl"
 )
 
 # ==========================================
@@ -288,9 +308,11 @@ joblib.dump(
 
 print("\n===================================")
 
-print("Model saved successfully!")
+print("model.pkl saved!")
 
 print("brand_model_map.pkl saved!")
+
+print("model_spec_map.pkl saved!")
 
 print("features.pkl saved!")
 

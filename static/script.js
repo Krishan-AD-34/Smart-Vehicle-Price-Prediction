@@ -11,7 +11,6 @@ const modelSelect =
 const resultBox =
     document.getElementById("result");
 
-
 // ========================================
 // LOAD MODELS DYNAMICALLY
 // ========================================
@@ -22,11 +21,18 @@ brandSelect.addEventListener(
 
         const brand = brandSelect.value;
 
+        // RESET MODEL
         modelSelect.innerHTML = `
             <option value="">
                 Loading Models...
             </option>
         `;
+
+        // RESET SPECS
+        document.getElementById("mileage").value = "";
+        document.getElementById("engine").value = "";
+        document.getElementById("max_power").value = "";
+        document.getElementById("seats").value = "";
 
         if (!brand) {
 
@@ -82,6 +88,52 @@ brandSelect.addEventListener(
     }
 );
 
+// ========================================
+// AUTO FILL VEHICLE SPECS
+// ========================================
+
+modelSelect.addEventListener(
+    "change",
+    async () => {
+
+        const model =
+            modelSelect.value;
+
+        if(!model) return;
+
+        try {
+
+            const response = await fetch(
+                `/get_specs/${model}`
+            );
+
+            const specs =
+                await response.json();
+
+            document.getElementById(
+                "mileage"
+            ).value = specs.mileage;
+
+            document.getElementById(
+                "engine"
+            ).value = specs.engine;
+
+            document.getElementById(
+                "max_power"
+            ).value = specs.max_power;
+
+            document.getElementById(
+                "seats"
+            ).value = specs.seats;
+
+        }
+
+        catch(error){
+
+            console.log(error);
+        }
+    }
+);
 
 // ========================================
 // FORM SUBMIT
@@ -98,13 +150,17 @@ document
         e.preventDefault();
 
         // ========================================
-        // LOADING STATE
+        // LOADING
         // ========================================
 
         resultBox.innerHTML = `
+
             <div class="loading">
+
                 Predicting Vehicle Price...
+
             </div>
+
         `;
 
         // ========================================
@@ -181,6 +237,8 @@ document
                 )
         };
 
+        console.log(data);
+
         // ========================================
         // API CALL
         // ========================================
@@ -222,15 +280,23 @@ document
                     <div class="details">
 
                         <p>
+
                             Estimated Range:
+
                             ${result.lower_price}
+
                             -
+
                             ${result.upper_price}
+
                         </p>
 
                         <p>
+
                             Prediction Confidence:
+
                             ${result.confidence}
+
                         </p>
 
                     </div>
@@ -262,6 +328,8 @@ document
         // ========================================
 
         catch(error){
+
+            console.log(error);
 
             resultBox.innerHTML = `
 
