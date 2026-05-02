@@ -1,99 +1,277 @@
-document.getElementById("predictForm").addEventListener("submit", async function(e){
+// ========================================
+// ELEMENTS
+// ========================================
 
-    e.preventDefault();
+const brandSelect =
+    document.getElementById("brand");
 
-    // Show loading
-    document.getElementById("output").innerHTML =
-        "Predicting vehicle price...";
+const modelSelect =
+    document.getElementById("car_name");
 
-    const data = {
+const resultBox =
+    document.getElementById("result");
 
-        brand: document.getElementById("brand").value,
 
-        car_age: parseInt(
-            document.getElementById("car_age").value
-        ),
+// ========================================
+// LOAD MODELS DYNAMICALLY
+// ========================================
 
-        fuel: document.getElementById("fuel").value,
+brandSelect.addEventListener(
+    "change",
+    async () => {
 
-        seller_type: document.getElementById("seller_type").value,
+        const brand = brandSelect.value;
 
-        owner: document.getElementById("owner").value,
+        modelSelect.innerHTML = `
+            <option value="">
+                Loading Models...
+            </option>
+        `;
 
-        transmission: document.getElementById("transmission").value,
+        if (!brand) {
 
-        km_driven: parseInt(
-            document.getElementById("km_driven").value
-        ),
+            modelSelect.innerHTML = `
+                <option value="">
+                    Select Model
+                </option>
+            `;
 
-    };
+            return;
+        }
 
-    try {
+        try {
 
-        const response = await fetch('/predict', {
+            const response = await fetch(
+                `/get_models/${brand}`
+            );
 
-            method:'POST',
+            const models = await response.json();
 
-            headers:{
-                'Content-Type':'application/json'
-            },
+            modelSelect.innerHTML = `
+                <option value="">
+                    Select Model
+                </option>
+            `;
 
-            body:JSON.stringify(data)
-        });
+            models.forEach(model => {
 
-        const result = await response.json();
+                const option =
+                    document.createElement(
+                        "option"
+                    );
 
-        // Success
-        if(result.predicted_price){
+                option.value = model;
 
-            document.getElementById("output").innerHTML = `
+                option.textContent = model;
 
-                <div class="result-card">
+                modelSelect.appendChild(option);
+            });
 
-                    <h2>
-                        Estimated Vehicle Price
-                    </h2>
+        }
 
-                    <h1>
-                        ₹ ${result.lower_price.toLocaleString()}
-                        -
-                        ₹ ${result.upper_price.toLocaleString()}
-                    </h1>
+        catch(error){
 
-                    <p>
-                        Average Estimated Price:
-                        ₹ ${result.predicted_price.toLocaleString()}
-                    </p>
+            console.log(error);
 
-                    <p>
-                        Prediction Confidence:
-                        ${result.confidence}%
-                    </p>
+            modelSelect.innerHTML = `
+                <option value="">
+                    Failed To Load Models
+                </option>
+            `;
+        }
+    }
+);
+
+
+// ========================================
+// FORM SUBMIT
+// ========================================
+
+document
+.getElementById("predictForm")
+
+.addEventListener(
+    "submit",
+
+    async function(e){
+
+        e.preventDefault();
+
+        // ========================================
+        // LOADING STATE
+        // ========================================
+
+        resultBox.innerHTML = `
+            <div class="loading">
+                Predicting Vehicle Price...
+            </div>
+        `;
+
+        // ========================================
+        // FORM DATA
+        // ========================================
+
+        const data = {
+
+            brand:
+                document
+                .getElementById("brand")
+                .value,
+
+            car_name:
+                document
+                .getElementById("car_name")
+                .value,
+
+            vehicle_age:
+                parseFloat(
+                    document
+                    .getElementById("vehicle_age")
+                    .value
+                ),
+
+            km_driven:
+                parseFloat(
+                    document
+                    .getElementById("km_driven")
+                    .value
+                ),
+
+            seller_type:
+                document
+                .getElementById("seller_type")
+                .value,
+
+            fuel_type:
+                document
+                .getElementById("fuel_type")
+                .value,
+
+            transmission_type:
+                document
+                .getElementById("transmission_type")
+                .value,
+
+            mileage:
+                parseFloat(
+                    document
+                    .getElementById("mileage")
+                    .value
+                ),
+
+            engine:
+                parseFloat(
+                    document
+                    .getElementById("engine")
+                    .value
+                ),
+
+            max_power:
+                parseFloat(
+                    document
+                    .getElementById("max_power")
+                    .value
+                ),
+
+            seats:
+                parseFloat(
+                    document
+                    .getElementById("seats")
+                    .value
+                )
+        };
+
+        // ========================================
+        // API CALL
+        // ========================================
+
+        try {
+
+            const response = await fetch(
+                "/predict",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify(data)
+                }
+            );
+
+            const result =
+                await response.json();
+
+            // ========================================
+            // SUCCESS
+            // ========================================
+
+            if(result.success){
+
+                resultBox.innerHTML = `
+
+                    <div class="price">
+
+                        ${result.predicted_price}
+
+                    </div>
+
+                    <div class="details">
+
+                        <p>
+                            Estimated Range:
+                            ${result.lower_price}
+                            -
+                            ${result.upper_price}
+                        </p>
+
+                        <p>
+                            Prediction Confidence:
+                            ${result.confidence}
+                        </p>
+
+                    </div>
+
+                `;
+            }
+
+            // ========================================
+            // ERROR
+            // ========================================
+
+            else{
+
+                resultBox.innerHTML = `
+
+                    <div class="error">
+
+                        ${result.error}
+
+                    </div>
+
+                `;
+            }
+
+        }
+
+        // ========================================
+        // SERVER ERROR
+        // ========================================
+
+        catch(error){
+
+            resultBox.innerHTML = `
+
+                <div class="error">
+
+                    Server Error
 
                 </div>
 
             `;
         }
-
-        // Error
-        else{
-
-            document.getElementById("output").innerHTML =
-
-                `<span style="color:red;">
-                    Error: ${result.error}
-                </span>`;
-        }
-
     }
-
-    catch(error){
-
-        document.getElementById("output").innerHTML =
-
-            `<span style="color:red;">
-                Server Error
-            </span>`;
-    }
-
-});
+);

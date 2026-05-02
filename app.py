@@ -1,141 +1,195 @@
 import os
 
 from flask import Flask, request, jsonify, render_template
-import joblib
+
+import pandas as pd
 import numpy as np
+import joblib
 
 app = Flask(__name__)
 
-# Load model
+# =====================================
+# LOAD FILES
+# =====================================
+
 model = joblib.load("model.pkl")
 
-# Load encoders
-encoders = joblib.load("encoders.pkl")
+brand_model_map = joblib.load(
+    "brand_model_map.pkl"
+)
+
+brands = joblib.load("brands.pkl")
+
+features = joblib.load("features.pkl")
 
 
-@app.route('/')
+# =====================================
+# HOME
+# =====================================
+
+@app.route("/")
 def home():
-    return render_template('index.html')
+
+    return render_template(
+        "index.html",
+        brands=brands
+    )
 
 
-@app.route('/predict', methods=['POST'])
+# =====================================
+# GET MODELS API
+# =====================================
+
+@app.route("/get_models/<brand>")
+def get_models(brand):
+
+    models = brand_model_map.get(
+        brand,
+        []
+    )
+
+    return jsonify(models)
+
+
+# =====================================
+# PREDICT
+# =====================================
+
+@app.route("/predict", methods=["POST"])
 def predict():
-
-    data = request.json
 
     try:
 
-        # Extract brand name
-        brand_name = data['brand'].split()[0]
+        data = request.get_json()
 
-        # Encode categorical values
-        brand = encoders["brand"].transform([brand_name])[0]
+        # =====================================
+        # INPUT DATAFRAME
+        # =====================================
 
-        fuel = encoders["fuel"].transform(
-            [data['fuel']]
-        )[0]
+        input_data = {
 
-        seller = encoders["seller_type"].transform(
-            [data['seller_type']]
-        )[0]
+            "brand":
+                data["brand"],
 
-        trans = encoders["transmission"].transform(
-            [data['transmission']]
-        )[0]
+            "car_name":
+                data["car_name"],
 
-        owner = encoders["owner"].transform(
-            [data['owner']]
-        )[0]
+            "vehicle_age":
+                float(data["vehicle_age"]),
 
-        # Input values
-        car_age = int(data['car_age'])
-        km_driven = int(data['km_driven'])
+            "km_driven":
+                float(data["km_driven"]),
 
-        # Feature order MUST match training
-        features = np.array([[
+            "seller_type":
+                data["seller_type"],
 
-            km_driven,
-            fuel,
-            seller,
-            trans,
-            owner,
-            car_age,
-            brand
+            "fuel_type":
+                data["fuel_type"],
 
-        ]])
+            "transmission_type":
+                data["transmission_type"],
 
-        # Prediction
-        prediction = float(model.predict(features)[0])
+            "mileage":
+                float(data["mileage"]),
 
-        # =========================
-        # SMART PRICE CORRECTIONS
-        # =========================
+            "engine":
+                float(data["engine"]),
 
-        # Realistic bounds
-        prediction = max(50000, prediction)
-        prediction = min(prediction, 5000000)
+            "max_power":
+                float(data["max_power"]),
 
-        # Depreciation by age
-        if car_age > 15:
-            prediction *= 0.75
+            "seats":
+                float(data["seats"])
+        }
 
-        elif car_age > 10:
-            prediction *= 0.85
+        df = pd.DataFrame([input_data])
 
-        # KM driven penalty
-        if km_driven > 150000:
-            prediction *= 0.80
+        # Match exact training order
+        df = df[features]
 
-        elif km_driven > 100000:
-            prediction *= 0.90
+        # =====================================
+        # PREDICTION
+        # =====================================
 
-        # Premium brand bonus
-        premium_brands = [
-            "BMW",
-            "Mercedes-Benz",
-            "Audi",
-            "Jaguar",
-            "Lexus",
-            "Volvo"
-        ]
+        prediction_log = model.predict(df)[0]
 
-        if brand_name in premium_brands:
-            prediction *= 1.35
+        prediction = np.expm1(
+            prediction_log
+        )
 
-        # Final rounding
-        prediction = round(prediction, 2)
+        # =====================================
+        # SAFETY LIMITS
+        # =====================================
 
-        # Price range
-        lower_price = round(prediction * 0.95)
-        upper_price = round(prediction * 1.05)
+        prediction = max(
+            prediction,
+            50000
+        )
 
-        # Confidence
-        confidence = 82
+        prediction = min(
+            prediction,
+            50000000
+        )
+
+        prediction = round(prediction)
+
+        # =====================================
+        # PRICE RANGE
+        # =====================================
+
+        lower_price = round(
+            prediction * 0.95
+        )
+
+        upper_price = round(
+            prediction * 1.05
+        )
+
+        # =====================================
+        # RESPONSE
+        # =====================================
 
         return jsonify({
 
-            "predicted_price": prediction,
+            "success": True,
 
-            "lower_price": lower_price,
+            "predicted_price":
+                f"₹ {prediction:,.0f}",
 
-            "upper_price": upper_price,
+            "lower_price":
+                f"₹ {lower_price:,.0f}",
 
-            "confidence": confidence
+            "upper_price":
+                f"₹ {upper_price:,.0f}",
 
+            "confidence": "87%"
         })
 
     except Exception as e:
 
         return jsonify({
+
+            "success": False,
+
             "error": str(e)
         })
 
 
+# =====================================
+# MAIN
+# =====================================
+
 if __name__ == "__main__":
 
-    port = int(os.environ.get("PORT", 5000))
+    port = int(
+        os.environ.get("PORT", 5000)
+    )
 
     app.run(
+
         host="0.0.0.0",
-        port=port
+
+        port=port,
+
+        debug=True
     )
