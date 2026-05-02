@@ -199,19 +199,20 @@ preprocessor = ColumnTransformer(
 # IMPROVED MODEL
 # ==========================================
 
+
 xgb_model = XGBRegressor(
 
-    n_estimators=2500,
+    n_estimators=700,
 
-    learning_rate=0.03,
+    learning_rate=0.05,
 
-    max_depth=14,
+    max_depth=8,
 
-    min_child_weight=1,
+    min_child_weight=2,
 
-    subsample=1.0,
+    subsample=0.9,
 
-    colsample_bytree=1.0,
+    colsample_bytree=0.9,
 
     gamma=0,
 
@@ -223,8 +224,11 @@ xgb_model = XGBRegressor(
 
     objective="reg:squarederror",
 
+    tree_method="hist",
+
     n_jobs=-1
 )
+
 
 # ==========================================
 # PIPELINE
